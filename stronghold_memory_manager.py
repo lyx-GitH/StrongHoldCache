@@ -38,15 +38,15 @@ class CudaParamSwapper():
         self.cuda_streams.append(cuda_handle)
 
     def _init_cuda_buffers(self):
-        buf_device = torch.cuda.current_device()
+        buf_device = torch.device(torch.cuda.current_device())
         self.cuda_available_buffer_ids = ThreadSafeDeque(
             [i for i in range(self.n_cuda_buffers)])
         self.cuda_buffers = [torch.empty(
-            size=self.cuda_buf_size, dtype=self.dtype, device=buf_device) for _ in range(self.n_cuda_buffers)]
+            self.cuda_buf_size, dtype=self.dtype, device=buf_device) for _ in range(self.n_cuda_buffers)]
 
     def _init_cuda_handles(self):
         self.cuda_streams = ThreadSafeDeque(
-            [CudaHandle(i) for i in range(self.n_cuda_streams)])
+            [CudaHandle(i, self) for i in range(self.n_cuda_streams)])
 
     def _cuda_swap_in_tensor(self, cuda_buf_id: int, cpu_buf: torch.Tensor, non_blocking: bool = True):
 
@@ -269,11 +269,11 @@ class StrongHoldMemManager():
             location : TensorLocation = self.cpu_nvme_swapper.param_locations[param_id]
             param.data = self.cuda_cpu_swapper.get(location)
     
-    def get_cuda(self, parqm_id):
+    def get_unit_from_cpu(self, unit_id) -> OrderedDict:
         pass
     
-    def get_cpu(self, param_id):
-        return self.cpu_nvme_swapper.get(param_id)
+    def get_unit_from_gpu(self, unit_id) -> OrderedDict:
+        pass
     
     
         
