@@ -25,6 +25,7 @@ class CudaParamSwapper():
         self.unit_id_to_cuda_id = {}
         self._init_cuda_buffers()
         self._init_cuda_handles()
+        
 
     def _apply_handle(self) -> CudaHandle:
         return self.cuda_streams.pop()
@@ -141,6 +142,12 @@ class StrongHoldMemManager():
         self.available_buffer_ids = {
             'cuda' : self.cuda_cpu_swapper.cuda_available_buffer_ids,
             'cpu' : self.cpu_nvme_swapper.available_buffer_ids
+        }
+        
+        self.available_handles = {
+            'cuda' : self.cuda_cpu_swapper.cuda_streams,
+            'nvme_read' : self.cpu_nvme_swapper.read_handles,
+            'nvme_write' : self.cpu_nvme_swapper.write_handles
         }
 
     def avail_cpu_buffers(self) -> int:
@@ -269,11 +276,14 @@ class StrongHoldMemManager():
             location : TensorLocation = self.cpu_nvme_swapper.param_locations[param_id]
             param.data = self.cuda_cpu_swapper.get(location)
     
-    def get_unit_from_cpu(self, unit_id) -> OrderedDict:
-        pass
+    def get_param_cuda(self, param_id : ParamId):
+        assert param_id in self.cpu_nvme_swapper.param_locations, f"unrecognized param {param_id}"
+        location = self.cpu_nvme_swapper.param_locations[param_id]
+        return self.cuda_cpu_swapper.get(location)
     
-    def get_unit_from_gpu(self, unit_id) -> OrderedDict:
-        pass
+    
+    def get_param_cpu(self, param_id : ParamId):
+        return self.cpu_nvme_swapper.get(param_id)
     
     
         
