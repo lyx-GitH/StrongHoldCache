@@ -41,7 +41,8 @@ class CudaHandle(IOHandle):
         '''
         if self.running:
             self.running = False
-            self.__stream.synchronize()
+            # self.__stream.synchronize()
+            torch.cuda.current_stream().wait_stream(self.__stream)
             self.cuda_swapper._revoke_handle(self)
     
     def get_stream(self) -> torch.cuda.Stream:
