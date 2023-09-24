@@ -149,7 +149,7 @@ class StrongHoldMemManager():
             'nvme_read' : self.cpu_nvme_swapper.read_handles,
             'nvme_write' : self.cpu_nvme_swapper.write_handles
         }
-
+        
     def avail_cpu_buffers(self) -> int:
         return len(self.cpu_nvme_swapper.available_buffer_ids)
 
